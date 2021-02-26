@@ -20,18 +20,18 @@ from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, Snippe
 
 class LanguageSnippet(Snippet):
 	description = """
-	Magento 2 uses csv files for translations per language. This snippet will generate 
+	Magento 2 uses csv files for translations per language. This snippet will generate
 	a translation csv file for selected language with one example translation.
 
 	- **language:** Language for translation file.
 
 	Snippet generation
 	------------------
-	When you generate a module for the language *English (United States)*, it will create 
+	When you generate a module for the language *English (United States)*, it will create
 	a csv translation file in *i18n/en_US.csv*
 	"""
 
-	LANGUAGE_CHOISES = [
+	LANGUAGE_CHOICES = [
 		('af_ZA', 'Afrikaans (South Africa)'),
 		('sq_AL', 'Albanian (Albania)'),
 		('ar_DZ', 'Arabic (Algeria)'),
@@ -125,5 +125,5 @@ class LanguageSnippet(Snippet):
 	@classmethod
 	def params(cls):
 		return [
-			SnippetParam(name='language', choises=cls.LANGUAGE_CHOISES, default='en_US')
+			SnippetParam(name='language', choices=cls.LANGUAGE_CHOICES, default='en_US')
 		]

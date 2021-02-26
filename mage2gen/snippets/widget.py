@@ -23,15 +23,15 @@ from ..utils import upperfirst
 
 class WidgetSnippet(Snippet):
 	description = """
-	
+
 	"""
 
-	TYPE_CHOISES = [
+	TYPE_CHOICES = [
 		('text', 'Text'),
 		('select', 'Select'),
 		('multiselect', 'Multiselect'),
 	]
-	
+
 	def add(self, name, field, field_type='text', sortorder=10, extra_params=None):
 
 		widget_block = Phpclass(
@@ -57,11 +57,11 @@ class WidgetSnippet(Snippet):
 				Xmlnode('description',node_text=name),
 				Xmlnode('parameters',nodes=[
 					Xmlnode('parameter',
-					attributes=parameter_attributes, 
+					attributes=parameter_attributes,
 					nodes=[
 						Xmlnode('label',node_text=field)
 					])
-				])	
+				])
 			])
 		]);
 
@@ -88,17 +88,17 @@ class WidgetSnippet(Snippet):
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
-				name='field', 
-				required=True, 
+				name='field',
+				required=True,
 				description='Example: product_id',
 				regex_validator= r'^[a-zA-Z]{1}\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
-				name='field_type', 
-				choises=cls.TYPE_CHOISES, 
+				name='field_type',
+				choices=cls.TYPE_CHOICES,
 				default='text'),
-			SnippetParam(name='sortorder', default=10, 
-				regex_validator=r'^\d*$', 
+			SnippetParam(name='sortorder', default=10,
+				regex_validator=r'^\d*$',
 				error_message='Must be numeric')
 		]
 
@@ -106,4 +106,4 @@ class WidgetSnippet(Snippet):
 	def extra_params(cls):
 		return [
 
-		]	
+		]

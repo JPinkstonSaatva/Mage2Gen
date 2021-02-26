@@ -28,23 +28,23 @@ class PluginSnippet(Snippet):
 
 	description = """Creates a Plugin
 
-	Plugins are designed to overwrite core Magento methods or methods from other 3rd party modules. 
+	Plugins are designed to overwrite core Magento methods or methods from other 3rd party modules.
 
-	You can choose to change it before, after, or around the original method is called. 
+	You can choose to change it before, after, or around the original method is called.
 
 	Example
 	-------
 
-	Change the product name to show pipes before and after the name. 
+	Change the product name to show pipes before and after the name.
 
-	Input for the plugin form 
+	Input for the plugin form
 
-	- **classname:** Magento\Catalog\Model\Product 
+	- **classname:** Magento\Catalog\Model\Product
 	- **methodname:** getName
 	- **plugintype:** After
 
 	.. code::
-		
+
 		public function afterGetName(
 			Magento\Catalog\Model\Product $subject,
 			$result
@@ -58,7 +58,7 @@ class PluginSnippet(Snippet):
 	TYPE_AFTER = 'after'
 	TYPE_AROUND = 'around'
 
-	TYPE_CHOISES = [
+	TYPE_CHOICES = [
 		(TYPE_BEFORE, 'Before'),
 		(TYPE_AFTER, 'After'),
 		(TYPE_AROUND, 'Around'),
@@ -70,7 +70,7 @@ class PluginSnippet(Snippet):
 	SCOPE_WEBAPI = 'webapi'
 	SCOPE_GRAPHQL = 'graphql'
 
-	SCOPE_CHOISES = [
+	SCOPE_CHOICES = [
 		(SCOPE_ALL, 'All'),
 		(SCOPE_FRONTEND, 'Frontend'),
 		(SCOPE_ADMINHTML, 'Backend'),
@@ -134,9 +134,9 @@ class PluginSnippet(Snippet):
 			body=body,
 			params=params
 		))
-	
+
 		# Add plug first will add the module namespace to PhpClass
-		self.add_class(plugin)	
+		self.add_class(plugin)
 
 		# Plugin XML
 		config = Xmlnode('config', attributes={'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation':"urn:magento:framework:ObjectManager/etc/config.xsd"}, nodes=[
@@ -198,11 +198,11 @@ class PluginSnippet(Snippet):
 				description='Example: getPrice',
 				regex_validator= r'^\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed'),
-			SnippetParam(name='plugintype', choises=cls.TYPE_CHOISES, default=cls.TYPE_AFTER),
-			SnippetParam(name='scope', choises=cls.SCOPE_CHOISES, default=cls.SCOPE_ALL),
-			SnippetParam(name='sortorder', default=10, 
-				regex_validator=r'^\d*$', 
+			SnippetParam(name='plugintype', choices=cls.TYPE_CHOICES, default=cls.TYPE_AFTER),
+			SnippetParam(name='scope', choices=cls.SCOPE_CHOICES, default=cls.SCOPE_ALL),
+			SnippetParam(name='sortorder', default=10,
+				regex_validator=r'^\d*$',
 				error_message='Must be numeric'),
 			SnippetParam(name='disabled', yes_no=True),
 		]
-		
+

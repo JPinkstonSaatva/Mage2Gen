@@ -30,17 +30,17 @@ class SnippetParam:
 		'some_param': r'value|value2'
 	}
 	"""
-	
+
 	def __init__(
-		self, name, description='', required=False, default=None, 
-		choises=None, yes_no=False, regex_validator='', error_message='',
+		self, name, description='', required=False, default=None,
+		choices=None, yes_no=False, regex_validator='', error_message='',
 		depend=None, label=None, multiple_choices=False, repeat=False
 	):
 		self.name = name
 		self.description = description
 		self.required = required
 		self.default = default
-		self.choises = choises
+		self.choices = choices
 		self.yes_no = yes_no
 		self.regex_validator = regex_validator
 		self.error_message = error_message
@@ -63,7 +63,7 @@ class SnippetParam:
 
 class MetaClass(type):
 	snippets = []
-	
+
 	def __new__(cls, clsname, bases, attrs):
 		newclass = super(MetaClass, cls).__new__(cls, clsname, bases, attrs)
 		if clsname != 'Snippet':
@@ -90,7 +90,7 @@ class Snippet(metaclass=MetaClass):
 	@classmethod
 	def name(cls):
 		return cls.__name__.lower().replace('snippet', '').capitalize()
-	
+
 	@classmethod
 	def params(cls):
 		params = []
@@ -98,9 +98,9 @@ class Snippet(metaclass=MetaClass):
 			if arg_name == 'self' or arg_name == 'extra_params':
 				continue
 			default = arg.default if arg.default != arg.empty else None
-			
+
 			params.append(SnippetParam(
-				name=arg_name, 
+				name=arg_name,
 				required=arg.default == arg.empty,
 				default=default,
 				yes_no=isinstance(default, bool),
@@ -112,7 +112,7 @@ class Snippet(metaclass=MetaClass):
 		"""
 		Gives a list of optional params, these params must be given to the add functon in a dict for the keyword extra_params.
 
-		To seperate params with a title, add a string with name in the list between the items. 
+		To seperate params with a title, add a string with name in the list between the items.
 		"""
 		return []
 

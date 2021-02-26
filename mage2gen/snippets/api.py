@@ -18,11 +18,11 @@ class ApiSnippet(Snippet):
 	snippet_label = 'Api'
 
 	description = """
-		Create your own api. Test is with the build in api tester in your magento 2 installation. http://<yourmagento2website>/swagger 
+		Create your own api. Test is with the build in api tester in your magento 2 installation. http://<yourmagento2website>/swagger
 
 		WARNING. This api is public. Acl will be added soon.
 	"""
-	API_METHOD_CHOISES = [
+	API_METHOD_CHOICES = [
 		('POST', 'POST'),
 		('GET', 'GET'),
 		('PUT', 'PUT'),
@@ -46,7 +46,7 @@ class ApiSnippet(Snippet):
 
 		model = Phpclass(
 			'\\'.join(['Model',methodname + 'Management']),
-			 implements=['\\{}'.format(api_classname)])
+				implements=['\\{}'.format(api_classname)])
 		model.add_method(Phpmethod(
 			api_method.lower() + upperfirst(api_name),
 			params=['$param'],
@@ -84,15 +84,15 @@ class ApiSnippet(Snippet):
 
 		##Apiclass
 
-	@classmethod	
+	@classmethod
 	def params(cls):
 		return [
 			SnippetParam(name='api_name', required=True,
 				regex_validator= r'^\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed'),
-			SnippetParam(name='api_method', choises=cls.API_METHOD_CHOISES, default='GET'),
+			SnippetParam(name='api_method', choices=cls.API_METHOD_CHOICES, default='GET'),
 		]
 
 	@classmethod
 	def extra_params(cls):
-		return []	
+		return []

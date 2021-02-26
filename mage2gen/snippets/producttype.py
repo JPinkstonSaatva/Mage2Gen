@@ -26,16 +26,16 @@ class ProductTypeSnippet(Snippet):
 
     description = """Creates a Product Type
 
-    	Magento supports a number of product types, each with its own behavior and attributes. 
-    	
-    	This powerful concept allows Magento to support a wide range of industries and merchant needs by mixing and matching product experiences in their catalog. 
+    	Magento supports a number of product types, each with its own behavior and attributes.
+
+    	This powerful concept allows Magento to support a wide range of industries and merchant needs by mixing and matching product experiences in their catalog.
 
     	Even more powerful, however, is the ability for developers to easily add new product types.
-    	
-    	In general, when a product class has distinct behavior or attributes, it should be represented by its own product type. 
-    	
-    	This allows the product type to have complex and custom logic and presentation, 
-    	
+
+    	In general, when a product class has distinct behavior or attributes, it should be represented by its own product type.
+
+    	This allows the product type to have complex and custom logic and presentation,
+
     	with no impact on other product types — ensuring that native product types can continue to function as intended.
 
     	"""
@@ -206,7 +206,7 @@ class ProductTypeSnippet(Snippet):
             ),
             SnippetParam(
                 name='extend_product_type',
-                choises=cls.STATIC_PRODUCT_TYPES,
+                choices=cls.STATIC_PRODUCT_TYPES,
                 required=True,
                 default='default'
             ),

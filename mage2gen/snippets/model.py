@@ -36,17 +36,17 @@ class InterfaceMethod(Phpmethod):
 
 class ModelSnippet(Snippet):
 	description = """
-	Model is used to create a easie CRUD interface to the database 
+	Model is used to create a easie CRUD interface to the database
 
 	- **Model ame:** The name of the model, the table name wil be <module_name>_<model_name>.
 	- **Field name:** The name of the database table field.
 	- **Field type:** The type of database field.
-	- **Adminhtml grid:** Add this field to the adminhtml grid layout  
+	- **Adminhtml grid:** Add this field to the adminhtml grid layout
 
 	**Model ID field**:	The snippet will auto add the model id field to the database table, the field name is <model_name>_id.
 	"""
 
-	FIELD_TYPE_CHOISES = [
+	FIELD_TYPE_CHOICES = [
 		('boolean','Boolean'),
 		('smallint','Smallint'),
 		('integer','Integer'),
@@ -273,14 +273,14 @@ class ModelSnippet(Snippet):
 		))
 		model_class.add_method(Phpmethod('getDataModel', access=Phpmethod.PUBLIC,
 			body="""${variable}Data = $this->getData();
-			
+
 			${variable}DataObject = $this->{variable}DataFactory->create();
 			$this->dataObjectHelper->populateWithArray(
 			    ${variable}DataObject,
 			    ${variable}Data,
 			    {variable_upper}Interface::class
 			);
-			
+
 			return ${variable}DataObject;
 			""".format(variable=model_name.lower(), variable_upper=model_name_capitalized),
 			docstring=[
@@ -386,15 +386,15 @@ class ModelSnippet(Snippet):
 					    $storeId = $this->storeManager->getStore()->getId();
 					    ${variable}->setStoreId($storeId);
 					}} */
-					
+
 					${variable}Data = $this->extensibleDataObjectConverter->toNestedArray(
 					    ${variable},
 					    [],
 					    \{data_interface}::class
 					);
-					
+
 					${variable}Model = $this->{variable}Factory->create()->setData(${variable}Data);
-					
+
 					try {{
 					    $this->resource->save(${variable}Model);
 					}} catch (\Exception $exception) {{
@@ -421,22 +421,22 @@ class ModelSnippet(Snippet):
 		model_repository_class.add_method(Phpmethod('getList', access=Phpmethod.PUBLIC,
 			params=['\Magento\Framework\Api\SearchCriteriaInterface $criteria'],
 			body="""$collection = $this->{variable}CollectionFactory->create();
-			
+
 					$this->extensionAttributesJoinProcessor->process(
 					    $collection,
 					    \{data_interface}::class
 					);
-			
+
 					$this->collectionProcessor->process($criteria, $collection);
-					
+
 					$searchResults = $this->searchResultsFactory->create();
 					$searchResults->setSearchCriteria($criteria);
-					
+
 					$items = [];
 					foreach ($collection as $model) {{
 					    $items[] = $model->getDataModel();
 					}}
-					
+
 					$searchResults->setItems($items);
 					$searchResults->setTotalCount($collection->getSize());
 					return $searchResults;
@@ -1103,7 +1103,7 @@ class ModelSnippet(Snippet):
 					        $this->messageManager->addErrorMessage(__('This {model_name} no longer exists.'));
 					        return $resultRedirect->setPath('*/*/');
 					    }}
-									
+
 					    $model->setData($data);
 
 					    try {{
@@ -1500,7 +1500,7 @@ class ModelSnippet(Snippet):
 			),
 			SnippetParam(
 				name='field_type',
-				choises=cls.FIELD_TYPE_CHOISES,
+				choices=cls.FIELD_TYPE_CHOICES,
 				default='text',
 			),
 			SnippetParam(name='adminhtml_grid', yes_no=True),

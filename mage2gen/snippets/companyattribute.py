@@ -82,7 +82,7 @@ class CompanyAttributeSnippet(Snippet):
 				params=['SchemaSetupInterface $setup'.format(setupType),'ModuleContextInterface $context'],
 				body=methodBody))
 
-		self.add_class(install_data)	
+		self.add_class(install_data)
 
 
 		extension_attributes_xml = Xmlnode('config',attributes={'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation':"urn:magento:framework:Api/etc/extension_attributes.xsd"},nodes=[
@@ -134,7 +134,7 @@ class CompanyAttributeSnippet(Snippet):
 		$company = $result;
 		$extensionAttributes = $company->getExtensionAttributes();
 		$companyExtension = $extensionAttributes ? $extensionAttributes : $this->companyExtensionFactory->create();
-		
+
 		""",
 						construct=True
 		)
@@ -148,7 +148,7 @@ class CompanyAttributeSnippet(Snippet):
 		if (!$extensionAttributes) {
 			return $company;
 		}
-		
+
 		"""
 		)
 		self.add_plugin('Magento\\Company\\Api\\CompanyRepositoryInterface', 'getList',
@@ -251,19 +251,19 @@ class CompanyAttributeSnippet(Snippet):
 	def params(cls):
 		return [
              SnippetParam(
-                name='attribute_label', 
-                required=True, 
+                name='attribute_label',
+                required=True,
                 description='Example: is_active',
                 regex_validator= r'^[a-zA-Z\d\-_\s]+$',
                 error_message='Only alphanumeric'),
              SnippetParam(
-                 name='required', 
+                 name='required',
                  default=True,
                  yes_no=True),
              SnippetParam(
-                 name='frontend_input', 
-                 choises=cls.FRONTEND_INPUT_TYPE,
-                 required=True,  
+                 name='frontend_input',
+                 choices=cls.FRONTEND_INPUT_TYPE,
+                 required=True,
                  default='input'),
 			SnippetParam(
 				name='upgrade_data',

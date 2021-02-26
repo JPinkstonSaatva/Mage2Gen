@@ -164,7 +164,7 @@ class SalesAttributeSnippet(Snippet):
         return [
             SnippetParam(
                 name='sales_entity',
-                choises=cls.SALES_ENTITIES,
+                choices=cls.SALES_ENTITIES,
                 required=True,
                 default='quote',
                 repeat=True),
@@ -177,7 +177,7 @@ class SalesAttributeSnippet(Snippet):
                 repeat=True),
             SnippetParam(
                 name='frontend_input',
-                choises=cls.FRONTEND_INPUT_TYPE,
+                choices=cls.FRONTEND_INPUT_TYPE,
                 required=True,
                 default='text',
                 repeat=True),

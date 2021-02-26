@@ -25,7 +25,7 @@ class ComponentSnippet(Snippet):
 	STYLE_CSS = 'css'
 	STYLE_SCSS = 'scss'
 
-	STYLES_CHOISES = [
+	STYLES_CHOICES = [
 		(STYLE_CSS, 'css'),
 		(STYLE_SCSS, 'sass'),
 	]
@@ -92,6 +92,6 @@ class {class_name} extends Component {{
 				regex_validator=r'^[\w\\]+$',
 				error_message='Only alphanumeric, underscore and backslash characters are allowed'),
 			SnippetParam(name='style_type',
-				choises=cls.STYLES_CHOISES,
+				choices=cls.STYLES_CHOICES,
 				default=cls.STYLE_CSS),
 		]

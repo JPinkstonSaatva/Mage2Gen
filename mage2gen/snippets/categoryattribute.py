@@ -73,7 +73,7 @@ class CategoryAttributeSnippet(Snippet):
     ]
 
     description = """
-		Install Magento 2 category attributes programmatically. 
+		Install Magento 2 category attributes programmatically.
 	"""
 
     def add(self, attribute_label, frontend_input='text', scope="ScopedAttributeInterface::SCOPE_STORE", required=False,
@@ -350,12 +350,12 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
                 error_message='Only alphanumeric'),
             SnippetParam(
                 name='frontend_input',
-                choises=cls.FRONTEND_INPUT_TYPE,
+                choices=cls.FRONTEND_INPUT_TYPE,
                 required=True,
                 default='text'),
             SnippetParam(
                 name='source_model',
-                choises=cls.CATEGORY_SOURCE_MODELS,
+                choices=cls.CATEGORY_SOURCE_MODELS,
                 depend={'frontend_input': r'select|multiselect'},
                 default='Magento\Eav\Model\Entity\Attribute\Source\Boolean'),
             SnippetParam(
@@ -367,7 +367,7 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
             SnippetParam(
                 name='scope',
                 required=True,
-                choises=cls.SCOPE_CHOICES,
+                choices=cls.SCOPE_CHOICES,
                 default='ScopedAttributeInterface::SCOPE_STORE'),
             SnippetParam(
                 name='required',

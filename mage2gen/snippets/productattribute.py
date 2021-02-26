@@ -60,7 +60,7 @@ class ProductAttributeSnippet(Snippet):
 	]
 
 	description = """
-		Install Magento 2 product attributes programmatically. 
+		Install Magento 2 product attributes programmatically.
 
 		The attribute is automatically added to all the attribute sets.
 	"""
@@ -283,7 +283,7 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
 					$index = 'IDX_' . strtoupper($this->getAttribute()->getAttributeCode());
 					$indexes[$index] = ['type' => 'index', 'fields' => [$this->getAttribute()->getAttributeCode()]];
-				
+
 					return $indexes;
 				""",
 				docstring=[
@@ -312,7 +312,7 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 				error_message='Only alphanumeric'),
 			 SnippetParam(
 				 name='frontend_input',
-				 choises=cls.FRONTEND_INPUT_TYPE,
+				 choices=cls.FRONTEND_INPUT_TYPE,
 				 required=True,
 				 default='text'),
 			 SnippetParam(
@@ -330,7 +330,7 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 			 SnippetParam(
 				 name='scope',
 				 required=True,
-				 choises=cls.SCOPE_CHOICES,
+				 choices=cls.SCOPE_CHOICES,
 				 default='ScopedAttributeInterface::SCOPE_STORE'),
 			 SnippetParam(
 				 name='required',
@@ -357,7 +357,7 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 				 name='apply_to',
 				 required=False,
 				 default='',
-				 choises=cls.APPLY_TO_CHOICES,
+				 choices=cls.APPLY_TO_CHOICES,
 				 multiple_choices=True),
 			SnippetParam(
 				 name='searchable',

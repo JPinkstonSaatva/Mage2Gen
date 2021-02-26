@@ -20,16 +20,16 @@ from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, Snippe
 
 class SystemSnippet(Snippet):
 	snippet_label = 'System / Config / Setting'
-	
+
 	description = """
 	System config is used in Magento for storing settings to use in your module.
 
-	For example an option to enable and disable your module. 
+	For example an option to enable and disable your module.
 
 
 	Snippet Instructions:
 	---------------------
-	
+
 	1. Fill in the Tab (can be found in Magento Adminpanel > Stores > Settings > Configuration)
 	2. Check the box to add your config to an existing Tab
 	3. Fill in the Section
@@ -37,7 +37,7 @@ class SystemSnippet(Snippet):
 	5. Fill in the Field
 	6. Select the Field type
 	7. Check the box to make your config available in the Graphql *StoreConfig* endpoint
-	
+
 	Available Field Types:
 	----------------------
 	- Text
@@ -47,8 +47,8 @@ class SystemSnippet(Snippet):
 	- Encrypted (Obscure)
 
 	For Select and Multiselect you will need to define a source model. By default this will be this will be the core Magento yes/no.
-	
-	
+
+
 	Retrieve config value:
 	----------------------
 	To retrieve the value you can use the xml path yourmodulename/general/enabled
@@ -58,32 +58,32 @@ class SystemSnippet(Snippet):
 		$this->_scopeConfig->getValue('yourmodulename/general/enabled', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
 
 	(Depends on \\\Magento\\\Framework\\\App\\\Config\\\ScopeConfigInterface)
-	
+
 	More information:
-		
+
 	https://github.com/magento/magento2/blob/2.3-develop/lib/internal/Magento/Framework/App/Config/ScopeConfigInterface.php#L29
-	
-	
+
+
 	Retrieve config in GraphQl:
 	---------------------------
 	Query a store’s configuation
-	
+
 	The following call returns all details of a store’s configuration.
 	.. json::
-	
+
 		{
 			  storeConfig {
 					yourmodulename_general_enabled
 			  }
 		}
-	
+
 	More information
-	
+
 	https://devdocs.magento.com/guides/v2.3/graphql/reference/store-config.html#extend-configuration-data
-	
+
 	"""
 
-	TYPE_CHOISES = [
+	TYPE_CHOICES = [
 		('text', 'Text'),
 		('textarea', 'Textarea'),
 		('select', 'Select'),
@@ -150,14 +150,14 @@ class SystemSnippet(Snippet):
 
 
 		# system xml
-		file = 'etc/adminhtml/system.xml'	
+		file = 'etc/adminhtml/system.xml'
 
 		if new_tab :
 			tabxml = Xmlnode('tab',attributes={
 					'id':tab,
 					'translate':'label',
 					'sortOrder':extra_params.get('tab_sortOrder',999) or 999},nodes=[
-				Xmlnode('label',node_text=extra_params.get('tab_label',tab) or tab)	
+				Xmlnode('label',node_text=extra_params.get('tab_label',tab) or tab)
 			 ])
 		else:
 			tabxml = False
@@ -217,11 +217,11 @@ class SystemSnippet(Snippet):
 								backend_model_xml,
 								config_path_xml
 							])
-						])	
+						])
 					])
 				])
 		])
-		
+
 		self.add_xml(file, config)
 
 
@@ -292,7 +292,7 @@ class SystemSnippet(Snippet):
 						}
 						$storeId = $storeId ? $storeId : $this->storeManager->getStore()->getId();
 						$name = isset($to['name']) ? $to['name'] : '';
-						
+
 						/** @var \Magento\Framework\Mail\TransportInterface $transport */
 						$transport = $this->transportBuilder->setTemplateIdentifier(
 						    $this->scopeConfig->getValue($template, ScopeInterface::SCOPE_STORE, $storeId)
@@ -347,7 +347,7 @@ class SystemSnippet(Snippet):
 
 		# acl xml
 		aclfile = 'etc/acl.xml'
-		
+
 		acl = Xmlnode('config', attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:framework:Acl/etc/acl.xsd"}, nodes=[
 			Xmlnode('acl',nodes=[
 				Xmlnode('resources',nodes=[
@@ -368,7 +368,7 @@ class SystemSnippet(Snippet):
 
 		# default config values xml
 		config_file = 'etc/config.xml'
-		
+
 		default_config = Xmlnode('config',attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:module:Magento_Store:etc/config.xsd"},nodes=[
 			Xmlnode('default',nodes=[
 				Xmlnode(section,nodes=[
@@ -378,7 +378,7 @@ class SystemSnippet(Snippet):
 				])
 			])
 		])
-		
+
 		self.add_xml(config_file, default_config)
 
 		if graphql:
@@ -437,45 +437,45 @@ class SystemSnippet(Snippet):
 	def params(cls):
 		return [
 			SnippetParam(
-				name='tab', 
-				required=True, 
+				name='tab',
+				required=True,
 				description='Example: catalog',
 				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
-				name='new_tab', 
+				name='new_tab',
 				default=True,
 				yes_no=True,
 				repeat=True),
 			SnippetParam(
-				name='section', 
-				required=True, 
+				name='section',
+				required=True,
 				description='Example: inventory',
 				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
-				name='group', 
-				required=True, 
+				name='group',
+				required=True,
 				description='Example: options',
 				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
-				name='field', 
-				required=True, 
+				name='field',
+				required=True,
 				description='Example: out_of_stock_label ',
 				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
-				name='field_type', 
-				choises=cls.TYPE_CHOISES, 
+				name='field_type',
+				choices=cls.TYPE_CHOICES,
 				default='text'),
 			SnippetParam(
-				name='source_model', 
-				choises=cls.SOURCE_MODELS,
-				depend= {'field_type': r'select|multiselect'}, 
+				name='source_model',
+				choices=cls.SOURCE_MODELS,
+				depend= {'field_type': r'select|multiselect'},
 				default='Magento\Config\Model\Config\Source\Yesno'),
 			SnippetParam(
 				name='source_model_options',

@@ -40,7 +40,7 @@ class CustomerAttributeSnippet(Snippet):
 		("int","Int"),
 		("decimal","Decimal")
 	]
-	
+
 	FRONTEND_INPUT_VALUE_TYPE = {
         "text":"varchar",
         "textarea":"text",
@@ -51,15 +51,15 @@ class CustomerAttributeSnippet(Snippet):
     }
 
 	USED_IN_FORMS = [
-		('adminhtml_customer','adminhtml_customer'),	
+		('adminhtml_customer','adminhtml_customer'),
 		('adminhtml_checkout','adminhtml_checkout'),
 		('customer_account_create','customer_account_create'),
 		('customer_account_edit','customer_account_edit')
 	]
 
 	ADDRESS_USED_IN_FORMS = [
-		('adminhtml_customer_address','adminhtml_customer_address'), 
-		('customer_address_edit','customer_address_edit'), 
+		('adminhtml_customer_address','adminhtml_customer_address'),
+		('customer_address_edit','customer_address_edit'),
 		('customer_register_address','customer_register_address')
 	]
 
@@ -77,9 +77,9 @@ class CustomerAttributeSnippet(Snippet):
 	]
 
 	description ="""
-		With this snippet you can create customer and customer address attribute programmatically thru a Magento 2 InstallData setup script. You can asign them to the forms where the should appear. 
+		With this snippet you can create customer and customer address attribute programmatically thru a Magento 2 InstallData setup script. You can asign them to the forms where the should appear.
 
-		Warning. Not all template files are setup to load customer or customer address attributes dynamically. 
+		Warning. Not all template files are setup to load customer or customer address attributes dynamically.
 
 		Magento 2 create customer attribute programmatically
 	"""
@@ -90,14 +90,14 @@ class CustomerAttributeSnippet(Snippet):
 		extra_params = extra_params if extra_params else {}
 		attribute_code = extra_params.get('attribute_code', None)
 		backend_model = ''
-		
+
 		if not attribute_code:
 			attribute_code = attribute_label.lower().replace(' ','_')[:30]
 		if frontend_input == 'select' and not source_model:
 			source_model = "Magento\Customer\Model\ResourceModel\Address\Attribute\Source\Country"
 		elif frontend_input == 'multiselect':
 			backend_model = "Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend"
-			if not source_model:    
+			if not source_model:
 				source_model = "Magento\Customer\Model\ResourceModel\Address\Attribute\Source\Country"
 		elif frontend_input != 'multiselect' and frontend_input != 'select':
 			source_model = ''
@@ -108,7 +108,7 @@ class CustomerAttributeSnippet(Snippet):
 			source_model_folder = 'Customer' if customer_entity =='customer' else 'Customer\\Address'
 			source_model_class = Phpclass(
 				'Model\\'+source_model_folder+'\\Attribute\\Source\\' + ''.join(n.capitalize() for n in attribute_code.split('_')),
-				extends='\Magento\Eav\Model\Entity\Attribute\Source\AbstractSource'	
+				extends='\Magento\Eav\Model\Entity\Attribute\Source\AbstractSource'
 			)
 
 			if frontend_input == 'select':
@@ -119,7 +119,7 @@ class CustomerAttributeSnippet(Snippet):
 				to_option_array = "[\n        {}\n    ]".format(',\n        '.join(
 					"['value' => (string) '{0}', 'label' => __('{0}')]".format(value.strip()) for value in source_model_options.split(','))
 				)
-			
+
 
 			source_model_class.add_method(Phpmethod('getAllOptions',
 				body="""
@@ -154,7 +154,7 @@ class CustomerAttributeSnippet(Snippet):
 		else :
 			forms_php_array = None
 
-		template = 'customerattribute.tmpl' if customer_entity=='customer' else 'customeraddressattribute.tmpl' 
+		template = 'customerattribute.tmpl' if customer_entity=='customer' else 'customeraddressattribute.tmpl'
 		templatePath = os.path.join(os.path.dirname(__file__), '../templates/attributes/'+template)
 
 		with open(templatePath, 'rb') as tmpl:
@@ -280,7 +280,7 @@ class CustomerAttributeSnippet(Snippet):
 		extension_attributes_file = 'etc/extension_attributes.xml'
 
 		api_class = "Magento\Customer\Api\Data\CustomerInterface"  if customer_entity=='customer' else 'Magento\Customer\Api\Data\AddressInterface'
-	
+
 		extension_attributes_xml = Xmlnode('config',attributes={'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation':"urn:magento:framework:Api/etc/extension_attributes.xsd"},nodes=[
 			Xmlnode('extension_attributes',attributes={'for':api_class},match_attributes={'for'},nodes=[
 				Xmlnode('attribute',attributes={
@@ -342,7 +342,7 @@ class CustomerAttributeSnippet(Snippet):
 				)
 			self.add_xml('etc/db_schema.xml', Xmlnode('schema', attributes={
 				'xsi:noNamespaceSchemaLocation': "urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd"},
-													  nodes=db_nodes))
+				nodes=db_nodes))
 
 			fieldset_file = 'etc/fieldset.xml'
 
@@ -354,28 +354,28 @@ class CustomerAttributeSnippet(Snippet):
 
 			for fieldset in fieldsets:
 				fieldset_xml = Xmlnode('config',
-									   attributes={'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-												   'xsi:noNamespaceSchemaLocation': "urn:magento:framework:DataObject/etc/fieldset.xsd"},
-									   nodes=[
-										   Xmlnode('scope', attributes={'id': 'global'},
-												   match_attributes={'id'}, nodes=[
-												   Xmlnode('fieldset', attributes={
-													   'id': fieldset
-												   }, match_attributes={'id'}, nodes=[
-													   Xmlnode('field', attributes={
-														   'name': attribute_code
-													   }, nodes=[
-														   Xmlnode('aspect', attributes={
-															   'name': 'to_order_address'
-														   }),
-														   Xmlnode('aspect', attributes={
-															   'name': 'to_customer_address'
-														   })
-													   ])
-												   ]),
+					attributes={'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+								'xsi:noNamespaceSchemaLocation': "urn:magento:framework:DataObject/etc/fieldset.xsd"},
+					nodes=[
+						Xmlnode('scope', attributes={'id': 'global'},
+								match_attributes={'id'}, nodes=[
+								Xmlnode('fieldset', attributes={
+									'id': fieldset
+								}, match_attributes={'id'}, nodes=[
+									Xmlnode('field', attributes={
+										'name': attribute_code
+									}, nodes=[
+										Xmlnode('aspect', attributes={
+											'name': 'to_order_address'
+										}),
+										Xmlnode('aspect', attributes={
+											'name': 'to_customer_address'
+										})
+									])
+								]),
 
-											   ])
-									   ])
+							])
+					])
 				self.add_xml(fieldset_file, fieldset_xml)
 
 			etc_module_sequence.append(
@@ -432,74 +432,74 @@ class CustomerAttributeSnippet(Snippet):
 
 		# Plugin XML
 		config = Xmlnode('config', attributes={'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-											   'xsi:noNamespaceSchemaLocation': "urn:magento:framework:ObjectManager/etc/config.xsd"},
-						 nodes=[
-							 Xmlnode('type', attributes={'name': classname}, nodes=[
-								 Xmlnode('plugin', attributes={
-									 'name': plugin.class_namespace.replace('\\', '_'),
-									 'type': plugin.class_namespace,
-									 'sortOrder': '10',
-									 'disabled': 'false'
-								 })
-							 ])
-						 ])
+											'xsi:noNamespaceSchemaLocation': "urn:magento:framework:ObjectManager/etc/config.xsd"},
+						nodes=[
+							Xmlnode('type', attributes={'name': classname}, nodes=[
+								Xmlnode('plugin', attributes={
+									'name': plugin.class_namespace.replace('\\', '_'),
+									'type': plugin.class_namespace,
+									'sortOrder': '10',
+									'disabled': 'false'
+								})
+							])
+						])
 
 		self.add_xml('etc/di.xml', config)
 
 	@classmethod
 	def params(cls):
 		return [
-             SnippetParam(
-                name='customer_entity', 
-                choises=cls.CUSTOMER_ENTITY,
-                required=True,  
-                default='customer',
+			SnippetParam(
+				name='customer_entity',
+				choices=cls.CUSTOMER_ENTITY,
+				required=True,
+				default='customer',
 				repeat=True),
-             SnippetParam(
-                name='attribute_label', 
-                required=True, 
-                description='Example: is_active',
-                regex_validator= r'^[a-zA-Z\d\-_\s]+$',
-                error_message='Only alphanumeric'),
-             SnippetParam(
-                name='customer_forms',
-                choises=cls.USED_IN_FORMS,
-                depend= {'customer_entity': r'^customer$'},
-                default=['adminhtml_customer','adminhtml_checkout','customer_account_create','customer_account_edit'],
+			SnippetParam(
+				name='attribute_label',
+				required=True,
+				description='Example: is_active',
+				regex_validator= r'^[a-zA-Z\d\-_\s]+$',
+				error_message='Only alphanumeric'),
+			SnippetParam(
+				name='customer_forms',
+				choices=cls.USED_IN_FORMS,
+				depend= {'customer_entity': r'^customer$'},
+				default=['adminhtml_customer','adminhtml_checkout','customer_account_create','customer_account_edit'],
 				multiple_choices=True,
-                ),
-             SnippetParam(
-                name='customer_address_forms',
-                choises=cls.ADDRESS_USED_IN_FORMS,
-                depend= {'customer_entity': r'^customer_address$'}, 
-                default=False,
+			),
+			SnippetParam(
+				name='customer_address_forms',
+				choices=cls.ADDRESS_USED_IN_FORMS,
+				depend= {'customer_entity': r'^customer_address$'},
+				default=False,
 				multiple_choices=True,
-                ),
-             SnippetParam(
-                 name='required', 
-                 default=True,
-                 yes_no=True),
-             SnippetParam(
-                 name='frontend_input', 
-                 choises=cls.FRONTEND_INPUT_TYPE,
-                 required=True,  
-                 default='text'),
-             SnippetParam(
-                name='source_model', 
-                choises=cls.SOURCE_MODELS,
-                depend= {'frontend_input': r'select|multiselect'}, 
-                default='Magento\Customer\Model\Customer\Attribute\Source\Group'),
-             SnippetParam(
-                name='source_model_options',
-                required=True,
-                depend= {'source_model': r'custom'},
-                description='Dropdown or Multiselect options comma seperated',
-                error_message='Only alphanumeric'),
-             SnippetParam(
+			),
+			SnippetParam(
+				name='required',
+				default=True,
+				yes_no=True),
+			SnippetParam(
+				name='frontend_input',
+				choices=cls.FRONTEND_INPUT_TYPE,
+				required=True,
+				default='text'),
+			SnippetParam(
+				name='source_model',
+				choices=cls.SOURCE_MODELS,
+				depend= {'frontend_input': r'select|multiselect'},
+				default='Magento\Customer\Model\Customer\Attribute\Source\Group'),
+			SnippetParam(
+				name='source_model_options',
+				required=True,
+				depend= {'source_model': r'custom'},
+				description='Dropdown or Multiselect options comma seperated',
+				error_message='Only alphanumeric'),
+			SnippetParam(
                 name='static_field_type',
-                choises=cls.STATIC_FIELD_TYPES,
+                choices=cls.STATIC_FIELD_TYPES,
                 default='varchar',
-                depend= {'frontend_input': r'static'}, 
+                depend= {'frontend_input': r'static'},
                 required=True,
                 ),
 			# TODO: add Upgrade Attribute Support
@@ -522,7 +522,7 @@ class CustomerAttributeSnippet(Snippet):
 				yes_no=True,
 				description="requires experius/module-extracheckoutaddressfields"
 			)
-         ]
+        ]
 
 	@classmethod
 	def extra_params(cls):

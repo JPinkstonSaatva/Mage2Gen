@@ -31,7 +31,7 @@ class GraphQlRouteLocatorSnippet(Snippet):
     STYLE_CSS = 'css'
     STYLE_SCSS = 'scss'
 
-    STYLES_CHOISES = [
+    STYLES_CHOICES = [
         (STYLE_CSS, 'css'),
         (STYLE_SCSS, 'sass'),
     ]
@@ -369,7 +369,7 @@ return ${entity_model_class_variable}->getId();""".format(entity_model_class=ent
                          regex_validator=r'^[a-z]{1}\w+$',
                          error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
             SnippetParam(name='style_type',
-                         choises=cls.STYLES_CHOISES,
+                         choices=cls.STYLES_CHOICES,
                          default=cls.STYLE_CSS),
         ]
 

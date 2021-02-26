@@ -28,7 +28,7 @@ class GraphQlEndpointSnippet(Snippet):
 
 	"""
 
-    GRAPHQL_TYPE_CHOISES = [
+    GRAPHQL_TYPE_CHOICES = [
         ('Query', 'Query'),
         ('Mutation', 'Mutation'),
         ('Custom', 'Custom')
@@ -311,7 +311,7 @@ return ${0}Data;""".format(identifier, item_identifier)
     @classmethod
     def params(cls):
         return [
-            SnippetParam(name='base_type', choises=cls.GRAPHQL_TYPE_CHOISES, default='Query'),
+            SnippetParam(name='base_type', choices=cls.GRAPHQL_TYPE_CHOICES, default='Query'),
             SnippetParam(
                 name='custom_type', required=True,
                 depend={'base_type': 'Custom'},

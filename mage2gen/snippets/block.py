@@ -22,7 +22,7 @@ class BlockSnippet(Snippet):
 
 	description = """Creates just a Block
 
-	Create a Simple Block for the Frontend or Adminhtml. 
+	Create a Simple Block for the Frontend or Adminhtml.
 	It is also possible to insert the block based on a layout handle and a reference.
 
 	Example
@@ -30,7 +30,7 @@ class BlockSnippet(Snippet):
 
 	Create a Notice Block
 
-	Input for the block form 
+	Input for the block form
 
 	- **classname:** Notices
 	- **methodname:** getCustomNotice
@@ -44,7 +44,7 @@ class BlockSnippet(Snippet):
 	SCOPE_FRONTEND = 'frontend'
 	SCOPE_ADMINHTML = 'backend'
 
-	SCOPE_CHOISES = [
+	SCOPE_CHOICES = [
 		(SCOPE_FRONTEND, 'Frontend'),
 		(SCOPE_ADMINHTML, 'Backend'),
 	]
@@ -52,7 +52,7 @@ class BlockSnippet(Snippet):
 	REFERENCE_CONTAINER = 'referenceContainer'
 	REFERENCE_BLOCK = 'referenceBlock'
 
-	REFERENCE_CHOISES = [
+	REFERENCE_CHOICES = [
 		(REFERENCE_CONTAINER, 'Container'),
 		(REFERENCE_BLOCK, 'Block'),
 	]
@@ -158,19 +158,19 @@ class BlockSnippet(Snippet):
 				description='Example: displayDemoNotice',
 				regex_validator= r'^\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed'),
-			SnippetParam(name='scope', choises=cls.SCOPE_CHOISES, default=cls.SCOPE_FRONTEND),
+			SnippetParam(name='scope', choices=cls.SCOPE_CHOICES, default=cls.SCOPE_FRONTEND),
 			SnippetParam(name='layout_handle',
 				description='Example: cms_index_index',
 				regex_validator= r'^\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed'),
 			SnippetParam(name='reference_type',
-						 choises=cls.REFERENCE_CHOISES,
-						 depend={'layout_handle': r'^\w+$'},
-						 default=cls.REFERENCE_CONTAINER),
+				choices=cls.REFERENCE_CHOICES,
+				depend={'layout_handle': r'^\w+$'},
+				default=cls.REFERENCE_CONTAINER),
 			SnippetParam(name='reference_name',
-						 description='Example: content',
-						 depend={'layout_handle': r'^\w+$'},
-						 regex_validator=r'^[\w.]+$',
-						 error_message='Only alphanumeric, dots and underscore characters are allowed'),
+				description='Example: content',
+				depend={'layout_handle': r'^\w+$'},
+				regex_validator=r'^[\w.]+$',
+				error_message='Only alphanumeric, dots and underscore characters are allowed'),
 		]
-		
+

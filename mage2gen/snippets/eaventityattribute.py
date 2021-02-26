@@ -266,7 +266,7 @@ $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 				error_message='Only alphanumeric'),
 			 SnippetParam(
 				 name='frontend_input',
-				 choises=cls.FRONTEND_INPUT_TYPE,
+				 choices=cls.FRONTEND_INPUT_TYPE,
 				 required=True,
 				 default='text'),
 			 SnippetParam(

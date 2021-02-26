@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 import os
+import re
 from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, SnippetParam, Readme
 
 class PaymentSnippet(Snippet):
@@ -32,19 +33,33 @@ class PaymentSnippet(Snippet):
 
 	"""
 
-	def add(self,method_name, extra_params=None):
 
-		payment_code = method_name.lower().replace(' ', '_')
+
+	def add(self, method_name, credit_card, extra_params=None):
+		def camel_to_snake(name):
+			name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+			return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+
+		payment_code = camel_to_snake(method_name)
 		payment_class_name = method_name
 
-		payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
-			extends='\Magento\Payment\Model\Method\Cc',
-			attributes=[
-				'protected $_code = "'+payment_code+'";',
-				'protected $_isOffline = true;',
-				'protected $_canAuthorize = true;',
-				'protected $_canCapture = true;'
-			])
+		if credit_card:
+			payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
+				extends='\Magento\Payment\Model\Method\Cc',
+				attributes=[
+					'protected $_code = "'+payment_code+'";',
+					'protected $_canUseInternal = true;',
+					'protected $_canAuthorize = true;',
+					'protected $_canCapture = true;'
+				])
+		else:
+			payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
+				extends='\Magento\Payment\Model\Method\AbstractMethod',
+				attributes=[
+					'protected $_code = "'+payment_code+'";',
+					'protected $_canUseInternal = true;'
+				])
+
 
 		payment_class.add_method(Phpmethod(
 			'isAvailable',
@@ -54,116 +69,117 @@ class PaymentSnippet(Snippet):
 			body="return parent::isAvailable($quote);"
 		))
 
-		payment_class.add_method(Phpmethod(
-			'capture',
-			params=[
-				'\\Magento\\Payment\\Model\\InfoInterface $payment',
-				'$amount'
-			],
-			body="""
-				try {
-					//check if payment has been authorized
-					if(is_null($payment->getParentTransactionId())) {
-						$this->authorize($payment, $amount);
+		if credit_card:
+			payment_class.add_method(Phpmethod(
+				'capture',
+				params=[
+					'\\Magento\\Payment\\Model\\InfoInterface $payment',
+					'$amount'
+				],
+				body="""
+					try {
+						//check if payment has been authorized
+						if(is_null($payment->getParentTransactionId())) {
+							$this->authorize($payment, $amount);
+						}
+
+						//build array of payment data for API request.
+						$request = [
+							'capture_amount' => $amount,
+							//any other fields, api key, etc.
+						];
+
+						//make API request to credit card processor.
+						$response = $this->makeCaptureRequest($request);
+
+						//todo handle response
+
+						//transaction is done.
+						$payment->setIsTransactionClosed(1);
+
+					} catch (\Exception $e) {
+						$message = $e->getMessage();
+						$this->debug($payment->getData(), $message);
 					}
 
-					//build array of payment data for API request.
-					$request = [
-						'capture_amount' => $amount,
-						//any other fields, api key, etc.
-					];
+					return $this;
+						"""
+			))
 
-					//make API request to credit card processor.
-					$response = $this->makeCaptureRequest($request);
+			payment_class.add_method(Phpmethod(
+				'authorize',
+				params=[
+					'\\Magento\\Payment\\Model\\InfoInterface $payment',
+					'$amount'
+				],
+				body="""
+					try {
 
-					//todo handle response
+						///build array of payment data for API request.
+						$request = [
+							'cc_type' => $payment->getCcType(),
+							'cc_exp_month' => $payment->getCcExpMonth(),
+							'cc_exp_year' => $payment->getCcExpYear(),
+							'cc_number' => $payment->getCcNumberEnc(),
+							'amount' => $amount
+						];
 
-					//transaction is done.
-					$payment->setIsTransactionClosed(1);
+						//check if payment has been authorized
+						$response = $this->makeAuthRequest($request);
 
-				} catch (\Exception $e) {
-					$message = $e->getMessage();
-					$this->debug($payment->getData(), $message);
-				}
+					} catch (\Exception $e) {
+						$message = $e->getMessage();
+						$this->debug($payment->getData(), $message);
+					}
 
-				return $this;
-					"""
-		))
+					if(isset($response['transactionID'])) {
+						// Successful auth request.
+						// Set the transaction id on the payment so the capture request knows auth has happened.
+						$payment->setTransactionId($response['transactionID']);
+						$payment->setParentTransactionId($response['transactionID']);
+					}
 
-		payment_class.add_method(Phpmethod(
-			'authorize',
-			params=[
-				'\\Magento\\Payment\\Model\\InfoInterface $payment',
-				'$amount'
-			],
-			body="""
-				try {
+					//processing is not done yet.
+					$payment->setIsTransactionClosed(0);
 
-					///build array of payment data for API request.
-					$request = [
-						'cc_type' => $payment->getCcType(),
-						'cc_exp_month' => $payment->getCcExpMonth(),
-						'cc_exp_year' => $payment->getCcExpYear(),
-						'cc_number' => $payment->getCcNumberEnc(),
-						'amount' => $amount
-					];
-
-					//check if payment has been authorized
-					$response = $this->makeAuthRequest($request);
-
-				} catch (\Exception $e) {
-					$message = $e->getMessage();
-					$this->debug($payment->getData(), $message);
-				}
-
-				if(isset($response['transactionID'])) {
-					// Successful auth request.
-					// Set the transaction id on the payment so the capture request knows auth has happened.
-					$payment->setTransactionId($response['transactionID']);
-					$payment->setParentTransactionId($response['transactionID']);
-				}
-
-				//processing is not done yet.
-				$payment->setIsTransactionClosed(0);
-
-				return $this;
-		"""
-		))
-
-		payment_class.add_method(Phpmethod(
-			'getConfigPaymentAction',
-			body='return self::ACTION_AUTHORIZE_CAPTURE;'
-		))
-
-		payment_class.add_method(Phpmethod(
-			'makeAuthRequest',
-			params=['$request'],
-			body="""
-				$response = ['transactionId' => 123]; //todo implement API call for auth request.
-
-				if(!$response) {
-					throw new \Magento\Framework\Exception\LocalizedException(__('Failed auth request.'));
-				}
-
-				return $response;
+					return $this;
 			"""
-		))
+			))
 
-		payment_class.add_method(Phpmethod(
-			'makeCaptureRequest',
-			params=['$request'],
-			body="""
-				$response = ['success']; //todo implement API call for capture request.
+			payment_class.add_method(Phpmethod(
+				'getConfigPaymentAction',
+				body='return self::ACTION_AUTHORIZE_CAPTURE;'
+			))
 
-				if(!$response) {
-					throw new \Magento\Framework\Exception\LocalizedException(__('Failed capture request.'));
-				}
+			payment_class.add_method(Phpmethod(
+				'makeAuthRequest',
+				params=['$request'],
+				body="""
+					$response = ['transactionId' => 123]; //todo implement API call for auth request.
 
-				return $response;
-			"""
-		))
+					if(!$response) {
+						throw new \Magento\Framework\Exception\LocalizedException(__('Failed auth request.'));
+					}
 
-		# self.add_class(payment_class)
+					return $response;
+				"""
+			))
+
+			payment_class.add_method(Phpmethod(
+				'makeCaptureRequest',
+				params=['$request'],
+				body="""
+					$response = ['success']; //todo implement API call for capture request.
+
+					if(!$response) {
+						throw new \Magento\Framework\Exception\LocalizedException(__('Failed capture request.'));
+					}
+
+					return $response;
+				"""
+			))
+
+		self.add_class(payment_class)
 
 		# payment_file = 'etc/payment.xml'
 
@@ -181,18 +197,20 @@ class PaymentSnippet(Snippet):
 		# ]);
 
 		# self.add_xml(payment_file, payment_xml)
+		if credit_card:
+			di_file = 'etc/adminhtml/di.xml'
 
-		di_file = 'etc/adminhtml/di.xml'
-
-		di = Xmlnode('config', attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:framework:ObjectManager/etc/config.xsd"},nodes=[
-			Xmlnode('type', attributes={'name':'Magento\Payment\Model\CcGenericConfigProvider'},nodes=[
-				Xmlnode('arguments',nodes=[
-					Xmlnode('argument',attributes={'name':'methodCodes','xsi:type':'array'},nodes=[
-						Xmlnode('item',attributes={'name':payment_code,'xsi:type':'const'},node_text=payment_class.class_namespace + '::CODE')
+			di = Xmlnode('config', attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:framework:ObjectManager/etc/config.xsd"},nodes=[
+				Xmlnode('type', attributes={'name':'Magento\Payment\Model\CcGenericConfigProvider'},nodes=[
+					Xmlnode('arguments',nodes=[
+						Xmlnode('argument',attributes={'name':'methodCodes','xsi:type':'array'},nodes=[
+							Xmlnode('item',attributes={'name':payment_code,'xsi:type':'const'},node_text=payment_class.class_namespace + '::CODE')
+						])
 					])
 				])
 			])
-		])
+
+			self.add_xml(di_file, di)
 
 		config_file = 'etc/config.xml'
 
@@ -266,4 +284,9 @@ class PaymentSnippet(Snippet):
 				description='Example: Invoice, Credits',
 				regex_validator= r'^[a-zA-Z]{1}\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
+			SnippetParam(
+				name='credit_card',
+				description='Credit Card Payment Method',
+                default=False,
+                yes_no=True)
 		]
