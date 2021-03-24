@@ -20,7 +20,7 @@ from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, Snippe
 
 class ConsoleSnippet(Snippet):
 	snippet_label = 'Console Command'
-	
+
 	description = """
 	Console commands are listed and executed by **bin/magento** command line tool.
 
@@ -31,14 +31,14 @@ class ConsoleSnippet(Snippet):
 	------------------
 	When you generate a module with an action_name (*backup*) and the module is named (*MageGen/Module*).
 	The generated command used by **bin/magento** is:
-	
+
 		bin/magento mage2gen_module:backup
 	"""
 
 	def add(self,action_name,short_description, extra_params=None):
 
 		console = Phpclass(
-			'Console\\Command\\'+action_name, 
+			'Console\\Command\\'+action_name,
 			extends='Command',
 			dependencies = [
 			'Symfony\Component\Console\Command\Command',
@@ -71,7 +71,7 @@ class ConsoleSnippet(Snippet):
 			Phpmethod(
 				'configure',
 				access='protected',
-				body=""" 
+				body="""
 				$this->setName("{module_name}:{action_name}");
 				$this->setDescription("{short_description}");
 				$this->setDefinition([
@@ -93,7 +93,7 @@ class ConsoleSnippet(Snippet):
 		config = Xmlnode('config', attributes={'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation':"urn:magento:framework:ObjectManager/etc/config.xsd"}, nodes=[
 			Xmlnode('type', attributes={'name': 'Magento\Framework\Console\CommandList'}, nodes=[
 				Xmlnode('arguments', nodes=[
-					Xmlnode('argument', 
+					Xmlnode('argument',
 							attributes={
 								'name':'commands',
 								'xsi:type':'array',
@@ -124,14 +124,14 @@ class ConsoleSnippet(Snippet):
 	def params(cls):
 		return [
 			SnippetParam(
-				name='action_name', 
-				required=True, 
+				name='action_name',
+				required=True,
 				description='Example: Backup, Import',
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
-				name='short_description', 
-				required=True, 
+				name='short_description',
+				required=True,
 				description='Example: Backups magento enviroment, Starts product import'),
 		]
 

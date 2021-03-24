@@ -33,12 +33,12 @@ class ShippingClass(Phpclass):
 
 		data['shipping_code'] = self.shipping_code
 
-		return data 
+		return data
 
 class ShippingSnippet(Snippet):
 	snippet_label = 'Shipping Method'
 
-	description = """Creates a basic Magento 2 shipping method.  
+	description = """Creates a basic Magento 2 shipping method.
 
 	Generated Shipping methods can be found in Magento Adminpanel > Stores > Settings > Configuration > Sales > Shipping Methods
 
@@ -47,7 +47,7 @@ class ShippingSnippet(Snippet):
 	Example:
 	________
 
-	if you want to calculate the shipping cost based on the shipping cost per product in the customers basket. 
+	if you want to calculate the shipping cost based on the shipping cost per product in the customers basket.
 
 	.. code::
 
@@ -105,7 +105,7 @@ class ShippingSnippet(Snippet):
 							Xmlnode('field', attributes={'id':'specificerrmsg','type':'textarea','sortOrder':80,'showInWebsite':1,'showInStore':1,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
 								Xmlnode('label',node_text='Displayed Error Message'),
 							]),
-						])	
+						])
 					])
 				])
 		])
@@ -144,9 +144,9 @@ class ShippingSnippet(Snippet):
 	def params(cls):
 		return [
 			SnippetParam(
-				name='method_name', 
-				required=True, 
+				name='method_name',
+				required=True,
 				description='Example: Freeshipping',
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 		]

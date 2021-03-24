@@ -21,7 +21,7 @@ from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, Snippe
 from ..utils import upperfirst, lowerfirst
 from ..module import TEMPLATE_DIR
 
-# Long boring code to add a lot of PHP classes and xml, only go here if you feel like too bring you happiness down. 
+# Long boring code to add a lot of PHP classes and xml, only go here if you feel like too bring you happiness down.
 # Or make your day happy that you don't maintain this code :)
 
 class InterfaceClass(Phpclass):
@@ -391,14 +391,14 @@ class EavEntitySnippet(Snippet):
 		))
 		entity_class.add_method(Phpmethod('getDataModel', access=Phpmethod.PUBLIC,
 			body="""${variable}Data = $this->getData();
-			
+
 			${variable}DataObject = $this->{variable}DataFactory->create();
 			$this->dataObjectHelper->populateWithArray(
 			    ${variable}DataObject,
 			    ${variable}Data,
 			    {variable_upper}Interface::class
 			);
-			
+
 			return ${variable}DataObject;
 			""".format(variable=entity_name.lower(), variable_upper=entity_name_capitalized),
 			docstring=[
@@ -502,7 +502,7 @@ class EavEntitySnippet(Snippet):
 			])
 		])
 		self.add_xml('etc/module.xml', etc_module)
-		
+
 		# Create collection
 		collection_entity_class = Phpclass('Model\\ResourceModel\\' + entity_name_capitalized.replace('_', '\\') + '\\Collection',
 				extends='\\Magento\\Eav\\Model\\Entity\\Collection\\AbstractCollection')
@@ -596,15 +596,15 @@ class EavEntitySnippet(Snippet):
 					    $storeId = $this->storeManager->getStore()->getId();
 					    ${variable}->setStoreId($storeId);
 					}} */
-					
+
 					${variable}Data = $this->extensibleDataObjectConverter->toNestedArray(
 					    ${variable},
 					    [],
 					    \{data_interface}::class
 					);
-					
+
 					${variable}Model = $this->{variable}Factory->create()->setData(${variable}Data);
-					
+
 					try {{
 					    $this->resource->save(${variable}Model);
 					}} catch (\Exception $exception) {{
@@ -631,22 +631,22 @@ class EavEntitySnippet(Snippet):
 		entity_repository_class.add_method(Phpmethod('getList', access=Phpmethod.PUBLIC,
 			params=['\Magento\Framework\Api\SearchCriteriaInterface $criteria'],
 			body="""$collection = $this->{variable}CollectionFactory->create();
-			
+
 					$this->extensionAttributesJoinProcessor->process(
 					    $collection,
 					    \{data_interface}::class
 					);
-			
+
 					$this->collectionProcessor->process($criteria, $collection);
-					
+
 					$searchResults = $this->searchResultsFactory->create();
 					$searchResults->setSearchCriteria($criteria);
-					
+
 					$items = [];
 					foreach ($collection as $model) {{
 					    $items[] = $model->getDataModel();
 					}}
-					
+
 					$searchResults->setItems($items);
 					$searchResults->setTotalCount($collection->getSize());
 					return $searchResults;
@@ -1313,7 +1313,7 @@ class EavEntitySnippet(Snippet):
 					        $this->messageManager->addErrorMessage(__('This {entity_name} no longer exists.'));
 					        return $resultRedirect->setPath('*/*/');
 					    }}
-									
+
 					    $model->setData($data);
 
 					    try {{
@@ -1698,7 +1698,7 @@ class EavEntitySnippet(Snippet):
 				name='entity_name',
 				description='Example: Blog',
 				required=True,
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True
 			),

@@ -27,7 +27,7 @@ class CacheSnippet(Snippet):
 		if not name:
 			name = self._module.name
 		cache_id = '{}_cache_tag'.format(name.lower())
-		
+
 		# Add cache class
 		cache_class = Phpclass('Model\\Cache\\{}'.format(name), extends='\\Magento\\Framework\\Cache\\Frontend\\Decorator\\TagScope', attributes=[
 			"const TYPE_IDENTIFIER = '{}';".format(cache_id),
@@ -40,13 +40,13 @@ class CacheSnippet(Snippet):
 			body="parent::__construct($cacheFrontendPool->get(self::TYPE_IDENTIFIER), self::CACHE_TAG);",
 			docstring=['@param \\Magento\\Framework\\App\\Cache\\Type\\FrontendPool $cacheFrontendPool']
 		))
-	
-		self.add_class(cache_class)	
+
+		self.add_class(cache_class)
 
 		# Cache XML
 		cache_xml = Xmlnode('config', attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:framework:Cache/etc/cache.xsd"}, nodes=[
 			Xmlnode('type', attributes={
-				'name': cache_id, 
+				'name': cache_id,
 				'translate': 'label,description',
 				'instance': cache_class.class_namespace
 				}, nodes=[
@@ -71,7 +71,7 @@ class CacheSnippet(Snippet):
 				name='name',
 				description='When empty uses module name',
 				required=False,
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
 				name='description',
@@ -79,4 +79,4 @@ class CacheSnippet(Snippet):
 				required=False
 			)
 		]
-		
+

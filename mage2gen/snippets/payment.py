@@ -33,8 +33,6 @@ class PaymentSnippet(Snippet):
 
 	"""
 
-
-
 	def add(self, method_name, credit_card, extra_params=None):
 		def camel_to_snake(name):
 			name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
@@ -43,31 +41,15 @@ class PaymentSnippet(Snippet):
 		payment_code = camel_to_snake(method_name)
 		payment_class_name = method_name
 
-		if credit_card:
-			payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
+
+		payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
+			if credit_card:
 				extends='\Magento\Payment\Model\Method\Cc',
-				attributes=[
-					'protected $_code = "'+payment_code+'";',
-					'protected $_canUseInternal = true;',
-					'protected $_canAuthorize = true;',
-					'protected $_canCapture = true;'
-				])
-		else:
-			payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
+			else
 				extends='\Magento\Payment\Model\Method\AbstractMethod',
-				attributes=[
-					'protected $_code = "'+payment_code+'";',
-					'protected $_canUseInternal = true;'
-				])
-
-
-		payment_class.add_method(Phpmethod(
-			'isAvailable',
-			params=[
-				'\\Magento\\Quote\\Api\\Data\\CartInterface $quote = null'
-			],
-			body="return parent::isAvailable($quote);"
-		))
+			attributes=[
+				'protected $_code = "'+payment_code+'";'
+			])
 
 		if credit_card:
 			payment_class.add_method(Phpmethod(
@@ -155,7 +137,7 @@ class PaymentSnippet(Snippet):
 				'makeAuthRequest',
 				params=['$request'],
 				body="""
-					$response = ['transactionId' => 123]; //todo implement API call for auth request.
+					$response = ['transactionId' => 123]; // TODO: implement API call for auth request.
 
 					if(!$response) {
 						throw new \Magento\Framework\Exception\LocalizedException(__('Failed auth request.'));
@@ -169,7 +151,7 @@ class PaymentSnippet(Snippet):
 				'makeCaptureRequest',
 				params=['$request'],
 				body="""
-					$response = ['success']; //todo implement API call for capture request.
+					$response = ['success']; // TODO: implement API call for capture request.
 
 					if(!$response) {
 						throw new \Magento\Framework\Exception\LocalizedException(__('Failed capture request.'));
@@ -181,22 +163,6 @@ class PaymentSnippet(Snippet):
 
 		self.add_class(payment_class)
 
-		# payment_file = 'etc/payment.xml'
-
-		# payment_xml = Xmlnode('payment',attributes={'xmlns:xsi':"http://www.w3.org/2001/XMLSchema-instance","xsi:noNamespaceSchemaLocation":"urn:magento:module:Magento_Payment:etc/payment.xsd"},nodes=[
-		# 	Xmlnode('groups',nodes=[
-		# 		Xmlnode('group',attributes={'id':'offline'}, nodes=[
-		# 			Xmlnode('label',node_text='Offline Payment Methods')
-		# 		])
-		# 	]),
-		# 	Xmlnode('methods',nodes=[
-		# 		Xmlnode('method',attributes={'name':payment_code},nodes=[
-		# 			Xmlnode('allow_multiple_address',node_text='1'),
-		# 		])
-		# 	])
-		# ]);
-
-		# self.add_xml(payment_file, payment_xml)
 		if credit_card:
 			di_file = 'etc/adminhtml/di.xml'
 
@@ -218,13 +184,12 @@ class PaymentSnippet(Snippet):
 			Xmlnode('default',nodes=[
 				Xmlnode('payment',nodes=[
 					Xmlnode(payment_code,nodes=[
-						Xmlnode('active',node_text='1'),
-						Xmlnode('model',node_text= payment_class.class_namespace),
-						Xmlnode('order_status',node_text='pending'),
 						Xmlnode('title',node_text=method_name),
-						Xmlnode('allowspecific',node_text='0'),
-						Xmlnode('group',node_text='offline'),
-						Xmlnode('cctypes', node_text='AE,VI,MC,DI')
+						Xmlnode('model',node_text= payment_class.class_namespace),
+						Xmlnode('active',node_text='1'),
+						Xmlnode('order_status',node_text='pending'),
+						if credit_card:
+							Xmlnode('cctypes', node_text='AE,VI,MC,DI'),
 					])
 				])
 			])
@@ -246,27 +211,17 @@ class PaymentSnippet(Snippet):
 							Xmlnode('field', attributes={'id':'title','type':'text','sortOrder':20,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
 								Xmlnode('label',node_text='Title'),
 							]),
-							Xmlnode('field', attributes={'id':'order_status','type':'select','sortOrder':30,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
-								Xmlnode('label',node_text='New Order Status'),
-								Xmlnode('source_model',node_text='Magento\\Sales\\Model\\Config\\Source\\Order\\Status\\NewStatus'),
-							]),
-							Xmlnode('field', attributes={'id':'sort_order','type':'text','sortOrder':60,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
-								Xmlnode('label',node_text='Sort Order'),
-							]),
-							Xmlnode('field', attributes={'id':'instructions','type':'textarea','sortOrder':70,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
-								Xmlnode('label',node_text='Instructions'),
-							]),
-							Xmlnode('cctypes', attributes={'id':'cctypes', 'type':'multiselect', 'sortOrder':65,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
-								Xmlnode('label',node_text='Credit Card Types'),
-								Xmlnode('source_model',node_text='Magento\Payment\Model\Source\Cctype'),
-							]),
+							if credit_card:
+								Xmlnode('cctypes', attributes={'id':'cctypes', 'type':'multiselect', 'sortOrder':65,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
+									Xmlnode('label',node_text='Credit Card Types'),
+									Xmlnode('source_model',node_text='Magento\Payment\Model\Source\Cctype'),
+								]),
 						])
 					])
 				])
 		])
 
 		self.add_xml(system_file,system)
-
 
 		self.add_static_file(
 			'.',
@@ -282,7 +237,7 @@ class PaymentSnippet(Snippet):
 				name='method_name',
 				required=True,
 				description='Example: Invoice, Credits',
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
 				name='credit_card',
