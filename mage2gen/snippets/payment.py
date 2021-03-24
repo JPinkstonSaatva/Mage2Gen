@@ -42,14 +42,18 @@ class PaymentSnippet(Snippet):
 		payment_class_name = method_name
 
 
-		payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
-			if credit_card:
+		if credit_card:
+			payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
 				extends='\Magento\Payment\Model\Method\Cc',
-			else
+				attributes=[
+					'protected $_code = "'+payment_code+'";'
+				])
+		else:
+			payment_class = Phpclass('Model\\Payment\\'+payment_class_name,
 				extends='\Magento\Payment\Model\Method\AbstractMethod',
-			attributes=[
-				'protected $_code = "'+payment_code+'";'
-			])
+				attributes=[
+					'protected $_code = "'+payment_code+'";',
+				])
 
 		if credit_card:
 			payment_class.add_method(Phpmethod(
@@ -130,7 +134,7 @@ class PaymentSnippet(Snippet):
 
 			payment_class.add_method(Phpmethod(
 				'getConfigPaymentAction',
-				body='return self::ACTION_AUTHORIZE_CAPTURE;'
+				body='return self::ACTION_AUTHORIZE;'
 			))
 
 			payment_class.add_method(Phpmethod(
@@ -180,24 +184,36 @@ class PaymentSnippet(Snippet):
 
 		config_file = 'etc/config.xml'
 
+		if creditcard:
+			cc_node = Xmlnode('cctypes', node_text='yadayada')
+		else:
+			cc_node = None
+
 		config = Xmlnode('config',attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:module:Magento_Store:etc/config.xsd"},nodes=[
-			Xmlnode('default',nodes=[
-				Xmlnode('payment',nodes=[
-					Xmlnode(payment_code,nodes=[
-						Xmlnode('title',node_text=method_name),
-						Xmlnode('model',node_text= payment_class.class_namespace),
-						Xmlnode('active',node_text='1'),
-						Xmlnode('order_status',node_text='pending'),
-						if credit_card:
-							Xmlnode('cctypes', node_text='AE,VI,MC,DI'),
+				Xmlnode('default',nodes=[
+					Xmlnode('payment',nodes=[
+						Xmlnode(payment_code,nodes=[
+							Xmlnode('title',node_text=method_name),
+							Xmlnode('model',node_text= payment_class.class_namespace),
+							Xmlnode('active',node_text='1'),
+							Xmlnode('order_status',node_text='pending'),
+							cc_node
+						])
 					])
 				])
-			])
-		]);
+			]);
 
 		self.add_xml(config_file, config)
 
 		system_file = 'etc/adminhtml/system.xml'
+
+		if credit_card:
+			cctypes_node = Xmlnode('cctypes', attributes={'id':'cctypes', 'type':'multiselect', 'sortOrder':65,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
+								Xmlnode('label',node_text='Credit Card Types'),
+								Xmlnode('source_model',node_text='Magento\Payment\Model\Source\Cctype'),
+							])
+		else:
+			cctypes_node = None
 
 		system = Xmlnode('config', attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:module:Magento_Config:etc/system_file.xsd"}, nodes=[
 				Xmlnode('system',  nodes=[
@@ -211,11 +227,7 @@ class PaymentSnippet(Snippet):
 							Xmlnode('field', attributes={'id':'title','type':'text','sortOrder':20,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
 								Xmlnode('label',node_text='Title'),
 							]),
-							if credit_card:
-								Xmlnode('cctypes', attributes={'id':'cctypes', 'type':'multiselect', 'sortOrder':65,'showInDefault':1,'translate':'label'},match_attributes={'id'},nodes=[
-									Xmlnode('label',node_text='Credit Card Types'),
-									Xmlnode('source_model',node_text='Magento\Payment\Model\Source\Cctype'),
-								]),
+							cctypes_node
 						])
 					])
 				])
@@ -237,7 +249,7 @@ class PaymentSnippet(Snippet):
 				name='method_name',
 				required=True,
 				description='Example: Invoice, Credits',
-				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
+				regex_validator= r'^[a-zA-Z]{1}[a-zA-Z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
 				name='credit_card',

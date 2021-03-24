@@ -71,7 +71,7 @@ class CacheSnippet(Snippet):
 				name='name',
 				description='When empty uses module name',
 				required=False,
-				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
+				regex_validator= r'^[a-zA-Z]{1}\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
 				name='description',

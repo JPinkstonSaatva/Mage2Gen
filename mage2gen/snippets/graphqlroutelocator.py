@@ -341,7 +341,7 @@ return ${entity_model_class_variable}->getId();""".format(entity_model_class=ent
                 name='pagetype',
                 required=True,
                 description='Example: blog_post_page, blog_category_page or home_page',
-                regex_validator=r'^[a-z]{1}[a-z0-9_]+$',
+                regex_validator=r'^[a-zA-Z]{1}\w+$',
                 error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
             SnippetParam(
                 name='entity_model_class',

@@ -15,7 +15,7 @@ class Mage2Gen(cmd.Cmd):
 	def __init__(self, *args, **kwargs):
 		super(Mage2Gen, self).__init__(*args, **kwargs)
 		self.preloop_runed = False
-		self.package_name = 'Mage2gen'
+		self.package_name = 'Saatva'
 		self.module_name = ''
 		self.description = ''
 
@@ -167,7 +167,7 @@ class Mage2Gen(cmd.Cmd):
 		elif os.path.isdir(os.path.join(path, module.package, module.name)):
 			if self.ask_param_input(SnippetParam(name='Module {}/{} already exists in this root, do you want to rewrite this?'.format(module.package, module.name), yes_no=True)):
 				return
-		
+
 		module.generate_module(path)
 		print('Module ({}/{}) generated to: {}'.format(module.package, module.name, path))
 

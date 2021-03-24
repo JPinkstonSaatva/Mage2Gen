@@ -77,7 +77,7 @@ class HelperSnippet(Snippet):
 				name='helper_name',
 				required=True,
 				description='Example: Backup, Import',
-				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
+				regex_validator= r'^[a-zA-Z]{1}\w+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'
 			),
 			SnippetParam(name='add_enabled_function', yes_no=True),
