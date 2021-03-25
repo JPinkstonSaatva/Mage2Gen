@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 import os
+import textwrap
 from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, SnippetParam, Readme
 
 class ControllerSnippet(Snippet):
@@ -32,7 +33,7 @@ class ControllerSnippet(Snippet):
 	This snippet will also create a layout.xml, Block and phtml for the action.
 	"""
 
-	def add(self, frontname='', section='index', action='index', adminhtml=False, ajax=False, extra_params=None, top_level_menu=True):
+	def add(self, frontname='', section='index', action='index', adminhtml=False, ajax=False, extra_params=None, has_menu=True, top_level_menu=True):
 		if not frontname:
 			frontname = '{}_{}'.format(self._module.package.lower(),self._module.name.lower())
 		file = 'etc/{}/routes.xml'.format('adminhtml' if adminhtml else 'frontend')
@@ -157,6 +158,7 @@ class ControllerSnippet(Snippet):
 		else:
 			# create block
 			block_class = ['Block']
+			block_method_name = 'getSomeData'
 			if adminhtml:
 				block_class.append('Adminhtml')
 			block_class.append(section)
@@ -180,6 +182,17 @@ class ControllerSnippet(Snippet):
 					'@param array $data',
 				]
 			))
+			block.add_method(Phpmethod(
+				block_method_name,
+				body=textwrap.dedent("""
+					// TODO: Do something useful and return something helpful
+					return 'Abracadabra!';
+					"""),
+				docstring=[
+					'Utility to grab some data for inclusion in a template',
+					'@return mixed'
+				]
+			))
 
 			self.add_class(block)
 
@@ -200,35 +213,52 @@ class ControllerSnippet(Snippet):
 
 			# add template file
 			path = os.path.join('view', 'adminhtml' if adminhtml else 'frontend', 'templates')
-			self.add_static_file(path, StaticFile("{}/{}.phtml".format(section, action),body="Hello {}/{}.phtml".format(section, action)))
+			self.add_static_file(path, StaticFile("{}/{}.phtml".format(section, action),body=textwrap.dedent("""\
+																								<?php
+																								/**
+																								 * @var $block \{classname}
+																								 */
+																								?>
+																								<div>
+																									<?= __('Hello {section}::{action}') ?>
+																									<br/>
+																									<?= $block->{function_name}() ?>
+																								</div>
+																								""").format(
+																												classname=block.class_namespace,
+																												function_name=block_method_name,
+																												section=section,
+																												action=action
+																											)))
 
 			if adminhtml:
-				# create menu.xml
-				top_level_menu_node = False
-				if top_level_menu:
-					top_level_menu_node = Xmlnode('add', attributes={
-						'id': "{}::top_level".format(self._module.package),
-						'title': self._module.package,
-						'module': self.module_name,
-						'sortOrder': 9999,
-						'resource': 'Magento_Backend::content',
-					})
-
-				self.add_xml('etc/adminhtml/menu.xml', Xmlnode('config', attributes={
-					'xsi:noNamespaceSchemaLocation': "urn:magento:module:Magento_Backend:etc/menu.xsd"}, nodes=[
-					Xmlnode('menu', nodes=[
-						top_level_menu_node,
-						Xmlnode('add', attributes={
-							'id': '{}::{}_{}'.format(self.module_name, section, action),
-							'title': "{} {}".format(section.replace('_', ' '), action.replace('_', ' ')),
+				if has_menu:
+					# create menu.xml
+					top_level_menu_node = False
+					if top_level_menu:
+						top_level_menu_node = Xmlnode('add', attributes={
+							'id': "{}::top_level".format(self._module.package),
+							'title': self._module.package,
 							'module': self.module_name,
 							'sortOrder': 9999,
-							'resource': '{}::{}_{}'.format(self.module_name, section, action),
-							'parent': '{}::top_level'.format(self._module.package,frontname),
-							'action': '{}/{}/{}'.format(frontname, section, action)
+							'resource': 'Magento_Backend::content',
 						})
-					])
-				]))
+
+					self.add_xml('etc/adminhtml/menu.xml', Xmlnode('config', attributes={
+						'xsi:noNamespaceSchemaLocation': "urn:magento:module:Magento_Backend:etc/menu.xsd"}, nodes=[
+						Xmlnode('menu', nodes=[
+							top_level_menu_node,
+							Xmlnode('add', attributes={
+								'id': '{}::{}_{}'.format(self.module_name, section, action),
+								'title': "{} {}".format(section.replace('_', ' '), action.replace('_', ' ')),
+								'module': self.module_name,
+								'sortOrder': 9999,
+								'resource': '{}::{}_{}'.format(self.module_name, section, action),
+								'parent': '{}::top_level'.format(self._module.package,frontname),
+								'action': '{}/{}/{}'.format(frontname, section, action)
+							})
+						])
+					]))
 
 
 				acl_xml = Xmlnode('config', attributes={'xmlns:xsi':'http://www.w3.org/2001/XMLSchema-instance','xsi:noNamespaceSchemaLocation':"urn:magento:framework:Acl/etc/acl.xsd"}, nodes=[
@@ -257,18 +287,19 @@ class ControllerSnippet(Snippet):
 	def params(cls):
 		return [
 			SnippetParam(name='frontname', required=False, description='On empty uses module name in lower case',
-				regex_validator= r'^[a-z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(name='section', required=True, default='index',
-				regex_validator= r'^[a-z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(name='action', required=True, default='index',
-				regex_validator= r'^[a-z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(name='adminhtml', yes_no=True),
 			SnippetParam(name='ajax', yes_no=True),
+			SnippetParam(name='has_menu', yes_no=True, default=True),
 			SnippetParam(
 				name='top_level_menu',
 				yes_no=True,
