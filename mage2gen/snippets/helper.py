@@ -20,7 +20,7 @@ from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, Snippe
 
 class HelperSnippet(Snippet):
 	snippet_label = 'Helper'
-	
+
 	description = """
 	A Helper can be used to retrieve logic which can be used more then once. For example the module function isEnabled.
 	"""
@@ -28,7 +28,7 @@ class HelperSnippet(Snippet):
 	def add(self,helper_name, add_enabled_function, extra_params=None):
 
 		helper = Phpclass(
-			'Helper\\'+helper_name, 
+			'Helper\\'+helper_name,
 			extends='AbstractHelper',
 			dependencies = [
 			'Magento\Framework\App\Helper\AbstractHelper'
@@ -74,10 +74,10 @@ class HelperSnippet(Snippet):
 	def params(cls):
 		return [
 			SnippetParam(
-				name='helper_name', 
-				required=True, 
+				name='helper_name',
+				required=True,
 				description='Example: Backup, Import',
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'
 			),
 			SnippetParam(name='add_enabled_function', yes_no=True),

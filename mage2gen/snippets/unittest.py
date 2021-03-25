@@ -24,7 +24,7 @@ class UnitTestSnippet(Snippet):
 	description = """
 	Unit tests are runned with *magento dev:tests:run <test>* and is used to test your code in development.
 
-	- **Test suite:** A class with a collection of tests 
+	- **Test suite:** A class with a collection of tests
 	- **Test name:** The name of a test
 	"""
 
@@ -90,15 +90,15 @@ class UnitTestSnippet(Snippet):
 			SnippetParam(
 				name='test_suite',
 				description='Example: BlogPost',
-				required=True, 
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				required=True,
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
 				name='test_name',
 				description='Example: create',
-				required=True, 
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				required=True,
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 		]
 

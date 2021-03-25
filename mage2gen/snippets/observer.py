@@ -122,7 +122,7 @@ class ObserverSnippet(Snippet):
 				name='event',
 				required=True,
 				description='Example: catalog_product_save_after',
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(name='scope', choices=cls.SCOPE_CHOICES, default=cls.SCOPE_ALL)
 		]

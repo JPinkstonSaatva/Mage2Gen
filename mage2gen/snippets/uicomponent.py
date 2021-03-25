@@ -48,15 +48,15 @@ class UiComponentSnippet(Snippet):
 			SnippetParam(
 				name='test_suite',
 				description='Example: BlogPost',
-				required=True, 
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				required=True,
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
 				name='test_name',
 				description='Example: create',
-				required=True, 
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				required=True,
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 		]
 

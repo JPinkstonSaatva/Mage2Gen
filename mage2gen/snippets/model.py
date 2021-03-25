@@ -1487,7 +1487,7 @@ class ModelSnippet(Snippet):
 				name='model_name',
 				description='Example: Blog',
 				required=True,
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True
 			),
@@ -1495,7 +1495,7 @@ class ModelSnippet(Snippet):
 				name='field_name',
 				description='Example: content',
 				required=True,
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'
 			),
 			SnippetParam(

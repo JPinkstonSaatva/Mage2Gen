@@ -84,14 +84,14 @@ class WidgetSnippet(Snippet):
 				name='name',
 				description='Example: productStock',
 				required=True,
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(
 				name='field',
 				required=True,
 				description='Example: product_id',
-				regex_validator= r'^[a-zA-Z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
 			SnippetParam(
 				name='field_type',
