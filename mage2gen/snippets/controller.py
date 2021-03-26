@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 import os
+import textwrap
 from .. import Module, Phpclass, Phpmethod, Xmlnode, StaticFile, Snippet, SnippetParam, Readme
 
 class ControllerSnippet(Snippet):
@@ -32,18 +33,17 @@ class ControllerSnippet(Snippet):
 	This snippet will also create a layout.xml, Block and phtml for the action.
 	"""
 
-	def add(self, frontname='', section='index', action='index', adminhtml=False, ajax=False, extra_params=None, top_level_menu=True):
+	def add(self, frontname='', section='index', action='index', ajax=False, extra_params=None, has_menu=True, top_level_menu=True, requires_url_params=False):
 		if not frontname:
 			frontname = '{}_{}'.format(self._module.package.lower(),self._module.name.lower())
-		file = 'etc/{}/routes.xml'.format('adminhtml' if adminhtml else 'frontend')
+		file = 'etc/{}/routes.xml'.format('adminhtml')
 
 		# Create config router
 		module = Xmlnode('module', attributes={'name': self.module_name})
-		if adminhtml:
-			module.attributes['before'] = 'Magento_Backend'
+		module.attributes['before'] = 'Magento_Backend'
 
 		config = Xmlnode('config', attributes={'xsi:noNamespaceSchemaLocation':"urn:magento:framework:App/etc/routes.xsd"}, nodes=[
-			Xmlnode('router', attributes={'id': 'admin' if adminhtml else 'standard'}, nodes=[
+			Xmlnode('router', attributes={'id': 'admin'}, nodes=[
 				Xmlnode('route', attributes={'id': frontname, 'frontName': frontname}, nodes=[
 					module
 				])
@@ -51,14 +51,16 @@ class ControllerSnippet(Snippet):
 		])
 		self.add_xml(file, config)
 
+		# Handy re-used vars
+		block_name = "{}.{}".format(section, action)
+
 		# Create controller
 		controller_class = ['Controller']
-		if adminhtml:
-			controller_class.append('Adminhtml')
+		controller_class.append('Adminhtml')
 		controller_class.append(section)
 		controller_class.append(action)
 
-		controller_extend = '\Magento\Backend\App\Action' if  adminhtml else '\Magento\Framework\App\Action\Action' 
+		controller_extend = '\Magento\Backend\App\Action'
 		controller = Phpclass('\\'.join(controller_class), controller_extend, attributes=[
 			'protected $resultPageFactory;'
 		])
@@ -69,7 +71,7 @@ class ControllerSnippet(Snippet):
 		])
 
 		# generate construct
-		context_class = '\Magento\\' + ('Backend' if adminhtml else 'Framework') +'\App\Action\Context'
+		context_class = '\Magento\\' + ('Backend') +'\App\Action\Context'
 		if ajax:
 			controller.add_method(Phpmethod(
 				'__construct',
@@ -90,8 +92,8 @@ class ControllerSnippet(Snippet):
 					'@param ' + context_class + '  $context',
 					'@param \\Magento\\Framework\\Json\\Helper\\Data $jsonHelper',
 				]
-			))	
-		else: 
+			))
+		else:
 			controller.add_method(Phpmethod(
 				'__construct',
 				params=[
@@ -121,7 +123,20 @@ class ControllerSnippet(Snippet):
 			}
         	"""
 		else:
-			execute_body = 'return $this->resultPageFactory->create();'
+			if requires_url_params:
+				execute_body = textwrap.dedent("""\
+												$resultPage = $this->resultPageFactory->create();
+												// TODO: Do controllery things, like:
+												//       - Validate and sanitize params, maybe redirect if invalid.
+												//       - Set the resulting clean data on the block for direct access.
+												//       - You can even create a class for this data to enforce structure!
+												$block = $resultPage->getLayout()->getBlock('{}');
+												$params = $this->getRequest()->getParams();
+												$block->setData('params', $params);
+												return $resultPage;
+                        						""").format(block_name)
+			else:
+				execute_body = 'return $this->resultPageFactory->create();'
 
 		controller.add_method(Phpmethod(
 			'execute',
@@ -152,20 +167,20 @@ class ControllerSnippet(Snippet):
 
 		self.add_class(controller)
 
-		if ajax: 
+		if ajax:
 			return
 		else:
 			# create block
 			block_class = ['Block']
-			if adminhtml:
-				block_class.append('Adminhtml')
+			block_method_name = 'getSomeData'
+			block_class.append('Adminhtml')
 			block_class.append(section)
 			block_class.append(action)
 
-			block_extend = '\Magento\Backend\Block\Template' if adminhtml else '\Magento\Framework\View\Element\Template'
+			block_extend = '\Magento\Backend\Block\Template'
 			block = Phpclass('\\'.join(block_class), block_extend)
 
-			block_context_class = '\Magento\Backend\Block\Template\Context' if adminhtml else '\Magento\Framework\View\Element\Template\Context'
+			block_context_class = '\Magento\Backend\Block\Template\Context'
 			block.add_method(Phpmethod(
 				'__construct',
 				params=[
@@ -181,28 +196,68 @@ class ControllerSnippet(Snippet):
 				]
 			))
 
+			method_body = ""
+			if requires_url_params:
+				method_body = textwrap.dedent("""
+												// TODO: Do something useful and return something helpful, even leverage data passed from the controller
+												$params = $this->getData('params');
+												return "I has params, don't you know:<br/>" . print_r($params, true);
+												""")
+			else:
+				method_body = textwrap.dedent("""
+												// TODO: Do something useful and return something helpful
+												return 'Abracadabra!';
+												""")
+
+			block.add_method(Phpmethod(
+				block_method_name,
+				body=method_body,
+				docstring=[
+					'Utility to grab some data for inclusion in a template',
+					'@return mixed'
+				]
+			))
+
 			self.add_class(block)
 
 			# Add layout xml
-			layout_xml = Xmlnode('page', attributes={'layout':"admin-1column" if adminhtml else "1column", 'xsi:noNamespaceSchemaLocation':"urn:magento:framework:View/Layout/etc/page_configuration.xsd"}, nodes=[
+			layout_xml = Xmlnode('page', attributes={'layout':"admin-1column", 'xsi:noNamespaceSchemaLocation':"urn:magento:framework:View/Layout/etc/page_configuration.xsd"}, nodes=[
 				Xmlnode('body', nodes=[
 					Xmlnode('referenceContainer', attributes={'name': 'content'}, nodes=[
 						Xmlnode('block', attributes={
-							'name': "{}.{}".format(section, action), 
+							'name': block_name,
 							'class': block.class_namespace,
 							'template': "{}::{}/{}.phtml".format(self.module_name, section, action)
 						})
 					])
 				])
 			])
-			path = os.path.join('view', 'adminhtml' if adminhtml else 'frontend', 'layout', "{}_{}_{}.xml".format(frontname, section, action))
+			path = os.path.join('view', 'adminhtml', 'layout', "{}_{}_{}.xml".format(frontname, section, action))
 			self.add_xml(path, layout_xml)
 
 			# add template file
-			path = os.path.join('view', 'adminhtml' if adminhtml else 'frontend', 'templates')
-			self.add_static_file(path, StaticFile("{}/{}.phtml".format(section, action),body="Hello {}/{}.phtml".format(section, action)))
+			path = os.path.join('view', 'adminhtml', 'templates')
+			body_text = textwrap.dedent("""\
+										<?php
+										/**
+										 * @var $block \{classname}
+										 */
+										?>
+										<div>
+											<?= __('<strong>The template says:</strong><br/><em>Hello {section}::{action}</em>') ?>
+											<br/><br/>
+											<strong>The block says:</strong><br/><em><?= $block->{function_name}() ?></em>
+										</div>
+										""").format(
+														classname=block.class_namespace,
+														function_name=block_method_name,
+														section=section,
+														action=action
+													)
 
-			if adminhtml:
+			self.add_static_file(path, StaticFile("{}/{}.phtml".format(section, action),body=body_text))
+
+			if has_menu:
 				# create menu.xml
 				top_level_menu_node = False
 				if top_level_menu:
@@ -248,7 +303,7 @@ class ControllerSnippet(Snippet):
 		self.add_static_file(
 			'.',
 			Readme(
-				specifications=" - Controller\n\t- {} > {}/{}/{}".format('adminhtml' if adminhtml else 'frontend', frontname, section, action),
+				specifications=" - Controller\n\t- {} > {}/{}/{}".format('adminhtml', frontname, section, action),
 			)
 		)
 
@@ -257,22 +312,27 @@ class ControllerSnippet(Snippet):
 	def params(cls):
 		return [
 			SnippetParam(name='frontname', required=False, description='On empty uses module name in lower case',
-				regex_validator= r'^[a-z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(name='section', required=True, default='index',
-				regex_validator= r'^[a-z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.',
 				repeat=True),
 			SnippetParam(name='action', required=True, default='index',
-				regex_validator= r'^[a-z]{1}\w+$',
+				regex_validator= r'^[a-z]{1}[a-z0-9_]+$',
 				error_message='Only lowercase alphanumeric and underscore characters are allowed, and need to start with a alphabetic character.'),
-			SnippetParam(name='adminhtml', yes_no=True),
 			SnippetParam(name='ajax', yes_no=True),
+			SnippetParam(name='has_menu', yes_no=True, default=True),
 			SnippetParam(
 				name='top_level_menu',
 				yes_no=True,
 				default=True,
 				repeat=True
+			),
+			SnippetParam(
+				name='requires_url_params',
+				yes_no=True,
+				default=False
 			)
 		]

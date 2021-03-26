@@ -184,8 +184,8 @@ class PaymentSnippet(Snippet):
 
 		config_file = 'etc/config.xml'
 
-		if creditcard:
-			cc_node = Xmlnode('cctypes', node_text='yadayada')
+		if credit_card:
+			cc_node = Xmlnode('cctypes', node_text='AE, VI, MC')
 		else:
 			cc_node = None
 

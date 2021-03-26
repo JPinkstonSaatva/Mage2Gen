@@ -10,7 +10,7 @@ from collections import defaultdict, OrderedDict
 
 
 class Mage2Gen(cmd.Cmd):
-	prompt = '(Mage2Gen) '
+	prompt = '(mAgentOrange) '
 
 	def __init__(self, *args, **kwargs):
 		super(Mage2Gen, self).__init__(*args, **kwargs)

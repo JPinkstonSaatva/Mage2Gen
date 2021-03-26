@@ -66,7 +66,7 @@ class ModelSnippet(Snippet):
 		super().__init__(*args, **kwargs)
 		self.count = 0
 
-	def add(self, model_name, field_name, field_type='text', adminhtml_grid=False, adminhtml_form=False,web_api=False, extra_params=False):
+	def add(self, model_name, field_name, field_type='text', adminhtml_grid=True, adminhtml_form=True,web_api=False, extra_params=False):
 		self.count += 1
 		extra_params = extra_params if extra_params else {}
 
