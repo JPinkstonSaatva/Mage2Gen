@@ -33,7 +33,7 @@ class ControllerSnippet(Snippet):
 	This snippet will also create a layout.xml, Block and phtml for the action.
 	"""
 
-	def add(self, frontname='', section='index', action='index', adminhtml=False, ajax=False, extra_params=None, has_menu=True, top_level_menu=True):
+	def add(self, frontname='', section='index', action='index', adminhtml=False, ajax=False, extra_params=None, has_menu=True, top_level_menu=True, requires_url_params=False):
 		if not frontname:
 			frontname = '{}_{}'.format(self._module.package.lower(),self._module.name.lower())
 		file = 'etc/{}/routes.xml'.format('adminhtml' if adminhtml else 'frontend')
@@ -51,6 +51,9 @@ class ControllerSnippet(Snippet):
 			])
 		])
 		self.add_xml(file, config)
+
+		# Handy re-used vars
+		block_name = "{}.{}".format(section, action)
 
 		# Create controller
 		controller_class = ['Controller']
@@ -122,7 +125,20 @@ class ControllerSnippet(Snippet):
 			}
         	"""
 		else:
-			execute_body = 'return $this->resultPageFactory->create();'
+			if requires_url_params:
+				execute_body = textwrap.dedent("""\
+												$resultPage = $this->resultPageFactory->create();
+												// TODO: Do controllery things, like:
+												//       - Validate and sanitize params, maybe redirect if invalid.
+												//       - Set the resulting clean data on the block for direct access.
+												//       - You can even create a class for this data to enforce structure!
+												$block = $resultPage->getLayout()->getBlock('{}');
+												$params = $this->getRequest()->getParams();
+												$block->setData('params', $params);
+												return $resultPage;
+                        						""").format(block_name)
+			else:
+				execute_body = 'return $this->resultPageFactory->create();'
 
 		controller.add_method(Phpmethod(
 			'execute',
@@ -182,12 +198,23 @@ class ControllerSnippet(Snippet):
 					'@param array $data',
 				]
 			))
+
+			method_body = ""
+			if requires_url_params:
+				method_body = textwrap.dedent("""
+												// TODO: Do something useful and return something helpful, even leverage data passed from the controller
+												$params = $this->getData('params');
+												return "I has params, don't you know:<br/>" . print_r($params, true);
+												""")
+			else:
+				method_body = textwrap.dedent("""
+												// TODO: Do something useful and return something helpful
+												return 'Abracadabra!';
+												""")
+
 			block.add_method(Phpmethod(
 				block_method_name,
-				body=textwrap.dedent("""
-					// TODO: Do something useful and return something helpful
-					return 'Abracadabra!';
-					"""),
+				body=method_body,
 				docstring=[
 					'Utility to grab some data for inclusion in a template',
 					'@return mixed'
@@ -201,7 +228,7 @@ class ControllerSnippet(Snippet):
 				Xmlnode('body', nodes=[
 					Xmlnode('referenceContainer', attributes={'name': 'content'}, nodes=[
 						Xmlnode('block', attributes={
-							'name': "{}.{}".format(section, action), 
+							'name': block_name,
 							'class': block.class_namespace,
 							'template': "{}::{}/{}.phtml".format(self.module_name, section, action)
 						})
@@ -213,23 +240,25 @@ class ControllerSnippet(Snippet):
 
 			# add template file
 			path = os.path.join('view', 'adminhtml' if adminhtml else 'frontend', 'templates')
-			self.add_static_file(path, StaticFile("{}/{}.phtml".format(section, action),body=textwrap.dedent("""\
-																								<?php
-																								/**
-																								 * @var $block \{classname}
-																								 */
-																								?>
-																								<div>
-																									<?= __('Hello {section}::{action}') ?>
-																									<br/>
-																									<?= $block->{function_name}() ?>
-																								</div>
-																								""").format(
-																												classname=block.class_namespace,
-																												function_name=block_method_name,
-																												section=section,
-																												action=action
-																											)))
+			body_text = textwrap.dedent("""\
+										<?php
+										/**
+										 * @var $block \{classname}
+										 */
+										?>
+										<div>
+											<?= __('<strong>The template says:</strong><br/><em>Hello {section}::{action}</em>') ?>
+											<br/><br/>
+											<strong>The block says:</strong><br/><em><?= $block->{function_name}() ?></em>
+										</div>
+										""").format(
+														classname=block.class_namespace,
+														function_name=block_method_name,
+														section=section,
+														action=action
+													)
+
+			self.add_static_file(path, StaticFile("{}/{}.phtml".format(section, action),body=body_text))
 
 			if adminhtml:
 				if has_menu:
@@ -305,5 +334,10 @@ class ControllerSnippet(Snippet):
 				yes_no=True,
 				default=True,
 				repeat=True
+			),
+			SnippetParam(
+				name='requires_url_params',
+				yes_no=True,
+				default=False
 			)
 		]
